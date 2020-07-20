@@ -1,0 +1,26 @@
+version: '3.2'
+
+services:
+
+  db:
+    image: mysql:8
+    restart: always
+    environment:
+      MYSQL_USER: "root"
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_DATABASE: "communication_scheduling"
+    ports:
+      - "3306:3306"
+    networks:
+      - main
+
+  adminer:
+    image: adminer
+    ports:
+      - "8085:8080"
+    networks:
+      - main
+
+networks:
+  main:
+    driver: bridge
