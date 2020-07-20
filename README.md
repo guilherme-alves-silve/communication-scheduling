@@ -1,10 +1,10 @@
 # Projeto - Agendamento de Envio de Mensagens
 
-##Ambiente para execução 
+## Ambiente para execução 
 * [Java 11+](http://openjdk.java.net/projects/jdk/11/)
 * [Docker](https://www.docker.com/)
 
-##Tecnologias utilizadas na aplicação
+## Tecnologias utilizadas na aplicação
 * [Quarkus](https://quarkus.io/)
 * [MySQL 8](https://www.mysql.com/)
 * [Hibernate](http://hibernate.org/)
@@ -12,11 +12,11 @@
 * [MicroProfile](https://start.microprofile.io/)
 * [Lombok](https://projectlombok.org/)
 
-##Tecnologias utilizadas nos testes
+## Tecnologias utilizadas nos testes
 * [H2](http://h2database.com/html/main.html)
 * [Rest Assured](http://rest-assured.io/)
 
-##Endpoints
+## Endpoints
 
 
 
