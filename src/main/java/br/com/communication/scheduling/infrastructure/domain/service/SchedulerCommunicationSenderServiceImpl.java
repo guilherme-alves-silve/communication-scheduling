@@ -67,13 +67,17 @@ public class SchedulerCommunicationSenderServiceImpl implements SchedulerCommuni
         this.lock = new ReentrantLock();
     }
 
-    @Transactional
     @Scheduled(every = "10s")
     public void jobSend() {
 
         lock.lock();
         try {
             final var messages = repository.getUnsentScheduleMessagesAsync(LIMIT_TO_SEND).join();
+            if (messages.isEmpty()) {
+                LOGGER.info("No message to send!");
+                return;
+            }
+
             LOGGER.info("Will try to send " + messages.size() + " messages!");
             final var httpClient = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(10))
