@@ -11,6 +11,7 @@
 * [RestEasy](https://resteasy.github.io/)
 * [MicroProfile](https://start.microprofile.io/)
 * [Lombok](https://projectlombok.org/)
+* [Docker](https://www.docker.com/)
 
 ## Tecnologias utilizadas nos testes
 * [H2](http://h2database.com/html/main.html)
@@ -22,9 +23,23 @@
 
 ## Endpoints
 
+* POST: /scheduling/
+* GET: /scheduling/status/{id}
+* DELETE: /scheduling/{id}
+
+## Swagger
+
+```
+http://localhost:8080/swagger-ui
+```
 
 
 ## Para executar a aplicação no modo de desenvolvimento
+
+Utilizar o [Docker Compose](https://docs.docker.com/compose/)
+```
+docker-compose up
+```
 
 Você pode executar sua aplicação com o comando abaixo, 
 no modo de desenvolvimento e isso habilita o modo de 'live coding':
