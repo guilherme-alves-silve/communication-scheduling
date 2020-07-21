@@ -2,6 +2,7 @@ package br.com.communication.scheduling.application.usecase;
 
 import br.com.communication.scheduling.application.converter.ScheduleDTOConverter;
 import br.com.communication.scheduling.application.dto.ScheduleDTO;
+import br.com.communication.scheduling.domain.entity.StatusMessage;
 import br.com.communication.scheduling.domain.repository.ScheduleRepository;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,9 +27,9 @@ public class ConsultStatusOfCommunicationMessageUseCase {
 		this.converter = converter;
 	}
 
-	public CompletableFuture<Boolean> consultStatusMessage(final ScheduleDTO dto) {
+	public CompletableFuture<StatusMessage> consultStatusMessage(final ScheduleDTO dto) {
 
 		final var schedule = converter.convert(dto);
-		return repository.saveAsync(schedule);
+		return repository.getStatusOfScheduledCommunicationMessageAsync(schedule);
 	}
 }

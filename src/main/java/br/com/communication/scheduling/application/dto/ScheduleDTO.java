@@ -18,10 +18,15 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ScheduleDTO {
 
+	private Long id;
 	private String to;
 	private String message;
 	private MessageType type;
 	private LocalDateTime timeToSend;
+
+	public static ScheduleDTO withId(final Long id) {
+		return new ScheduleDTO().setId(id);
+	}
 
 	@Override
 	public String toString() {

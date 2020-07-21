@@ -16,6 +16,7 @@ public class ScheduleDTOConverter {
 	public Schedule convert(final ScheduleDTO dto) {
 		Objects.requireNonNull(dto, "dto cannot be null!");
 		return Schedule.builder()
+				.id(dto.getId())
 				.to(dto.getTo())
 				.message(dto.getMessage())
 				.type(dto.getType())

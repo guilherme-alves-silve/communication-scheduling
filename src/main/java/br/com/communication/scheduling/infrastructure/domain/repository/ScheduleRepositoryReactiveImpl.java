@@ -1,6 +1,8 @@
 package br.com.communication.scheduling.infrastructure.domain.repository;
 
 import br.com.communication.scheduling.domain.entity.Schedule;
+import br.com.communication.scheduling.domain.entity.StatusMessage;
+import br.com.communication.scheduling.domain.exception.NotFoundExceptionDomain;
 import br.com.communication.scheduling.domain.repository.ScheduleRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.panache.common.Page;
@@ -46,8 +48,11 @@ public class ScheduleRepositoryReactiveImpl implements ScheduleRepository, Panac
 
 		return threadContext.withContextCapture(managedExecutor.supplyAsync(() ->
 				find("SELECT s FROM Schedule s " +
-					"WHERE s.sent = false AND " +
-					"s.timeToSend <= :pTimeToSend", Map.of("pTimeToSend", LocalDateTime.now()))
+					"WHERE s.sent = :pSent AND " +
+					"s.timeToSend <= :pTimeToSend", Map.of(
+							"pSent", StatusMessage.UNSENT,
+							"pTimeToSend", LocalDateTime.now()
+				))
 				.page(Page.ofSize(limit))
 				.list()
 		));
@@ -66,9 +71,23 @@ public class ScheduleRepositoryReactiveImpl implements ScheduleRepository, Panac
 	public CompletableFuture<Boolean> updateToSendAsync(final Schedule schedule) {
 		return threadContext.withContextCapture(managedExecutor.supplyAsync(() -> {
 			int result = update("UPDATE FROM Schedule s " +
-					"SET s.sent = true " +
-					"WHERE s.id = :pId", Map.of("pId", schedule.getId()));
+					"SET s.sent = :pSent " +
+					"WHERE s.id = :pId", Map.of(
+					"pSent", StatusMessage.SENT,
+					"pId", schedule.getId()
+			));
 			return result > 0;
 		}));
+	}
+
+	@Override
+	public CompletableFuture<StatusMessage> getStatusOfScheduledCommunicationMessageAsync(Schedule schedule) {
+		return threadContext.withContextCapture(managedExecutor.supplyAsync(() ->
+				find("SELECT s FROM Schedule s " +
+					"WHERE s.id = :pId", Map.of("pId", schedule.getId()))
+					.firstResultOptional()
+					.map(Schedule::getSent)
+					.orElseThrow(NotFoundExceptionDomain::new)
+		));
 	}
 }

@@ -16,6 +16,10 @@
 * [H2](http://h2database.com/html/main.html)
 * [Rest Assured](http://rest-assured.io/)
 
+## Facilidades de utilização das versões do Java
+
+* [jabba](https://github.com/shyiko/jabba)
+
 ## Endpoints
 
 

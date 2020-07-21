@@ -27,7 +27,7 @@ public class RemoveScheduleCommunicationMessageUseCase {
 	}
 
 	@Transactional(Transactional.TxType.REQUIRED)
-	public CompletableFuture<Boolean> sendSchedule(final ScheduleDTO dto) {
+	public CompletableFuture<Boolean> removeSchedule(final ScheduleDTO dto) {
 
 		final var schedule = converter.convert(dto);
 		return repository.deleteAsync(schedule);

@@ -1,6 +1,7 @@
 package br.com.communication.scheduling.domain.repository;
 
 import br.com.communication.scheduling.domain.entity.Schedule;
+import br.com.communication.scheduling.domain.entity.StatusMessage;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -17,4 +18,6 @@ public interface ScheduleRepository {
 	CompletableFuture<Boolean> deleteAsync(final Schedule schedule);
 
 	CompletableFuture<Boolean> updateToSendAsync(final Schedule schedule);
+
+    CompletableFuture<StatusMessage> getStatusOfScheduledCommunicationMessageAsync(final Schedule schedule);
 }

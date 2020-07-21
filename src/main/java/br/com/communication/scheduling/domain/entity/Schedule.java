@@ -1,11 +1,14 @@
 package br.com.communication.scheduling.domain.entity;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTypeSerializer;
 import javax.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.StringJoiner;
 
+import br.com.communication.scheduling.domain.json.StatusMessageJsonbSerializer;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,10 +21,10 @@ import lombok.Getter;
 @Entity
 @Getter
 @Builder
-@EqualsAndHashCode
 @AllArgsConstructor
 @RegisterForReflection
 @Table(name = "schedule_tbl")
+@EqualsAndHashCode(of = "id", doNotUseGetters = true)
 public class Schedule {
 
 	@Id
@@ -42,13 +45,21 @@ public class Schedule {
 	@Column(name = "time_to_send")
 	private LocalDateTime timeToSend;
 
-	private boolean sent;
+	@Enumerated(EnumType.ORDINAL)
+	@JsonbTypeSerializer(value = StatusMessageJsonbSerializer.class)
+	private StatusMessage sent;
 
 	/**
 	 * Used by hibernate
 	 */
 	protected Schedule() {
 
+	}
+
+	public static Schedule withId(final Long id) {
+		return Schedule.builder()
+				.id(id)
+				.build();
 	}
 
 	@Override
