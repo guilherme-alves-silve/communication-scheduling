@@ -1,6 +1,7 @@
 package br.com.communication.scheduling.infrastructure.domain.repository;
 
 import br.com.communication.scheduling.domain.entity.Schedule;
+import br.com.communication.scheduling.domain.entity.StatusMessage;
 import br.com.communication.scheduling.domain.repository.ScheduleRepository;
 import br.com.communication.scheduling.infrastructure.fixture.ScheduleFixture;
 import br.com.communication.scheduling.test.db.RepositoryUtils;
@@ -12,9 +13,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.inject.Inject;
-import javax.transaction.*;
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @QuarkusTestResource(H2DatabaseTestResource.class)
@@ -25,30 +32,39 @@ class ScheduleRepositoryReactiveImplTest {
     private final TransactionManager transactionManager;
 
     @Inject
-    ScheduleRepositoryReactiveImplTest(final ScheduleRepository repository, TransactionManager transactionManager) {
+    ScheduleRepositoryReactiveImplTest(final ScheduleRepository repository,
+                                       final TransactionManager transactionManager) {
         this.repository = repository;
         this.transactionManager = transactionManager;
     }
 
     @BeforeEach
-    @Transactional
-    public void setUpEach() {
+    public void setUpEach() throws Exception {
+
+        transactionManager.begin();
 
         RepositoryUtils.save(repository, ScheduleFixture.getPastSchedules().toArray(new Schedule[0]));
         RepositoryUtils.save(repository, ScheduleFixture.getFutureSchedules().toArray(new Schedule[0]));
+
+        transactionManager.commit();
     }
 
     @AfterEach
-    @Transactional
-    public void tearDownEach() {
-        RepositoryUtils.delete(repository, ScheduleFixture.getPastSchedules().toArray(new Schedule[0]));
-        RepositoryUtils.delete(repository, ScheduleFixture.getFutureSchedules().toArray(new Schedule[0]));
+    public void tearDownEach() throws Exception {
+
+        transactionManager.begin();
+
+        final var schedules = repository.getAllAsync().join();
+
+        RepositoryUtils.delete(repository, schedules.toArray(new Schedule[0]));
+
+        transactionManager.commit();
     }
 
     @Test
-    void shouldGetAllUnsendedSchedules() {
+    void shouldGetAllUnsentSchedules() {
 
-        final var schedules = repository.getUnsendedScheduleMessagesAsync(3)
+        final var schedules = repository.getUnsentScheduleMessagesAsync(3)
                 .toCompletableFuture()
                 .join();
 
@@ -60,7 +76,7 @@ class ScheduleRepositoryReactiveImplTest {
             throws SystemException, NotSupportedException, HeuristicRollbackException,
             HeuristicMixedException, RollbackException {
 
-        final var schedules = repository.getUnsendedScheduleMessagesAsync(5)
+        final var schedules = repository.getUnsentScheduleMessagesAsync(5)
                 .toCompletableFuture()
                 .join();
 
@@ -72,10 +88,24 @@ class ScheduleRepositoryReactiveImplTest {
 
         transactionManager.commit();
 
-        final var mustBeEmptySchedules = repository.getUnsendedScheduleMessagesAsync(5)
+        final var mustBeEmptySchedules = repository.getUnsentScheduleMessagesAsync(5)
                 .toCompletableFuture()
                 .join();
 
         assertEquals(0, mustBeEmptySchedules.size());
+    }
+
+    @Test
+    void shouldGetStatusOfScheduledCommunicationMessage() {
+
+        final var schedules = repository.getUnsentScheduleMessagesAsync(1)
+                .toCompletableFuture()
+                .join();
+
+        assertTrue(schedules.size() > 0);
+
+        final var status = repository.getStatusOfScheduledCommunicationMessageAsync(schedules.get(0)).join();
+
+        assertEquals(status, StatusMessage.UNSENT);
     }
 }
