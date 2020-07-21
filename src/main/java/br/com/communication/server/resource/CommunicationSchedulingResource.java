@@ -27,6 +27,7 @@ import br.com.communication.scheduling.application.usecase.ConsultStatusOfCommun
 import br.com.communication.scheduling.application.usecase.RemoveScheduleCommunicationMessageUseCase;
 import br.com.communication.scheduling.application.usecase.ScheduleCommunicationMessageUseCase;
 import io.smallrye.mutiny.Uni;
+import org.jboss.logging.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -36,6 +37,8 @@ import javax.ws.rs.core.Response.Status;
 
 @Path("/scheduling")
 public class CommunicationSchedulingResource {
+
+    private static final Logger LOGGER = Logger.getLogger(CommunicationSchedulingResource.class);
 
     private final ScheduleCommunicationMessageUseCase scheduleUseCase;
     private final ConsultStatusOfCommunicationMessageUseCase consultStatusUseCase;
@@ -71,6 +74,7 @@ public class CommunicationSchedulingResource {
 
         final var response = consultStatusUseCase.consultStatusMessage(ScheduleDTO.withId(id))
                 .thenApply(result -> Response.ok(result).build());
+
         return Uni.createFrom()
                 .completionStage(response);
     }
@@ -81,7 +85,12 @@ public class CommunicationSchedulingResource {
     public Uni<Response> deleteSchedule(final @PathParam("id") Long id) {
 
         final var response = removeScheduleUseCase.removeSchedule(ScheduleDTO.withId(id))
-                .thenApply(result -> result? Response.noContent().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build());
+                .thenApply(result -> result? Response.noContent().build() : Response.status(Status.INTERNAL_SERVER_ERROR).build())
+                .exceptionally(throwable -> {
+                    LOGGER.error(throwable);
+                    return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+                });
+
         return Uni.createFrom()
                 .completionStage(response);
     }

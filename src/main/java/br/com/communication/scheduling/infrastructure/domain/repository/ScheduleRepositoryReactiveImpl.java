@@ -86,8 +86,9 @@ public class ScheduleRepositoryReactiveImpl implements ScheduleRepository, Panac
 	public CompletableFuture<Boolean> deleteAsync(final Schedule schedule) {
 
 		return threadContext.withContextCapture(managedExecutor.supplyAsync(() -> {
-			if (isPersistent(schedule)) {
-				delete(schedule);
+			final var syncDbSchedule = findByIdOptional(schedule.getId());
+			if (syncDbSchedule.isPresent()) {
+				delete(syncDbSchedule.get());
 				return true;
 			}
 
